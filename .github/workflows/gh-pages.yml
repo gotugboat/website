@@ -25,11 +25,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Prepare theme
+        run: make theme
+
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
           node-version: 18.15.0
           cache: 'npm'
+          cache-dependency-path: './themes/doks/package-lock.json'
 
       - name: Setup Hugo
         uses: peaceiris/actions-hugo@v2
@@ -39,7 +43,7 @@ jobs:
 
       - name: Build
         run: |
-          make theme public
+          make public
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
