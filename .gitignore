@@ -1,0 +1,18 @@
+# System files
+.DS_Store
+.DS_Store*
+Thumbs.db
+._*
+
+# IDEs and text editor files
+.vscode/
+.idea/
+*.iml
+
+# npm assets
+node_modules/
+
+# Hugo generated files
+public/
+resources/
+.hugo_build.lock
