@@ -1,3 +1,14 @@
 baseURL: "http://example.org/"
 languageCode: "en-us"
-title: "My New Hugo Site"
+title: "Tugboat"
+
+theme: doks
+
+# asdf workaround
+# https://github.com/gohugoio/hugo/issues/9811
+security:
+  exec:
+    osEnv:
+      - '(?i)^(PATH|PATHEXT|APPDATA|TMP|TEMP|TERM)$'
+      - ^ASDF_DIR$
+      - ^HOME$
