@@ -16,3 +16,9 @@ node_modules/
 public/
 resources/
 .hugo_build.lock
+
+# Content from generated documentation
+docs/cli/tugboat*.md
+content/docs/
+generated/
+repos/
