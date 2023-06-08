@@ -20,6 +20,8 @@ concurrency:
 
 jobs:
   build:
+    env:
+      TUGBOAT_PATH: '${{ github.workspace }}/tugboat'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -41,9 +43,26 @@ jobs:
           hugo-version: 0.109.0
           extended: true
 
+      - name: Get docs reference version
+        id: doc_reference
+        run: |
+          echo "tag=$(cat data/tugboat.yml | grep version | awk -F ': ' '{print $2}')" >> $GITHUB_OUTPUT
+
+      - name: Setup Tugboat
+        uses: actions/checkout@v3
+        with:
+          repository: gotugboat/tugboat
+          ref: ${{ steps.doc_reference.outputs.tag }}
+          path: ${{ env.TUGBOAT_PATH }}
+
+      - name: Setup Go
+        uses: actions/setup-go@v3
+        with:
+          go-version-file: '${{ env.TUGBOAT_PATH }}/go.mod'
+
       - name: Build
         run: |
-          make public
+          make docs public
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
