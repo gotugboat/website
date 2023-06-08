@@ -1,4 +1,4 @@
-all: asdf theme public
+all: asdf theme docs public
 
 .PHONY: asdf
 asdf:
@@ -34,5 +34,22 @@ endif
 
 .PHONY: reset
 reset: clean
+	make docs\:clean
 	$(info ******************** removing submodule ********************)
 	git submodule deinit -f themes/doks
+
+.PHONY: docs
+docs:
+	make docs\:generate
+
+.PHONY: docs\:generate
+docs\:generate:
+	$(info ******************** generating docs ********************)
+	./load-docs.sh
+
+.PHONY: docs\:clean
+docs\:clean:
+ifneq (,$(wildcard generated))
+	$(info ******************** cleaning up generated docs ********************)
+	rm -rf generated repos content/docs
+endif
