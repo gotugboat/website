@@ -27,7 +27,7 @@ usage() {
 
 clean_generated_content() {
   # remove the old generated docs
-  if [[ -d "${GENERATED_DOCS_DIR}" ]]; then
+  if directory_exists "${GENERATED_DOCS_DIR}"; then
     log_info "Cleaning contents of the generated cli folder (./${GENERATED_DOCS_DIR})"
     if [[ "${IS_DRY_RUN}" != "true" ]]; then
       rm -rf ${GENERATED_DOCS_DIR}/*
@@ -35,7 +35,7 @@ clean_generated_content() {
   fi
 
   # create a fresh generated folder if needed
-  if [[ ! -d "${GENERATED_DOCS_DIR}" ]]; then
+  if ! directory_exists "${GENERATED_DOCS_DIR}"; then
     log_debug "Creating generated docs folder (./${GENERATED_DOCS_DIR})"
     if [[ "${IS_DRY_RUN}" != "true" ]]; then
       mkdir -p "${GENERATED_DOCS_DIR}"
@@ -69,7 +69,7 @@ prepare_doc_generation() {
 prepare_getting_started_documentation() {
   log_info "Preparing getting started documentation"
 
-  if [[ ! -d ${GENERATED_DOCS_DIR}/getting-started ]]; then
+  if ! directory_exists "${GENERATED_DOCS_DIR}/getting-started"; then
     log_debug "Creating directory: ${GENERATED_DOCS_DIR}/getting-started"
     if [[ "${IS_DRY_RUN}" != "true" ]]; then
       mkdir -p "${GENERATED_DOCS_DIR}/getting-started"
@@ -91,7 +91,7 @@ prepare_getting_started_documentation() {
 prepare_configuration_documentation() {
   log_info "Preparing configuration documentation"
 
-  if [[ ! -d ${GENERATED_DOCS_DIR}/configuration ]]; then
+  if ! directory_exists "${GENERATED_DOCS_DIR}/configuration"; then
     log_debug "Creating directory: ${GENERATED_DOCS_DIR}/configuration"
     if [[ "${IS_DRY_RUN}" != "true" ]]; then
       mkdir -p "${GENERATED_DOCS_DIR}/configuration"
@@ -107,7 +107,7 @@ prepare_configuration_documentation() {
 prepare_help_documentation() {
   log_info "Preparing help documentation"
 
-  if [[ ! -d ${GENERATED_DOCS_DIR}/help ]]; then
+  if ! directory_exists "${GENERATED_DOCS_DIR}/help"; then
     log_debug "Creating directory: ${GENERATED_DOCS_DIR}/help"
     if [[ "${IS_DRY_RUN}" != "true" ]]; then
       mkdir -p "${GENERATED_DOCS_DIR}/help"
@@ -214,7 +214,7 @@ finalize_generated_docs() {
 
   log_debug "Moving generated documentation to ${CONTENT_DOCS_DIR}"
   # If everything so far as worked, remove the old docs
-  if [[ -d "${CONTENT_DOCS_DIR}" ]]; then
+  if directory_exists "${CONTENT_DOCS_DIR}"; then
     log_debug "Cleaning existing content docs folder"
     if [[ "${IS_DRY_RUN}" != "true" ]]; then
       rm -r "${CONTENT_DOCS_DIR}"
@@ -222,7 +222,7 @@ finalize_generated_docs() {
   fi
 
   # create the fresh docs folder
-  if [[ ! -d "${CONTENT_DOCS_DIR}" ]]; then
+  if ! directory_exists "${CONTENT_DOCS_DIR}"; then
     log_debug "Creating folder (${CONTENT_DOCS_DIR})"
     if [[ "${IS_DRY_RUN}" != "true" ]]; then
       mkdir -p "${CONTENT_DOCS_DIR}"
@@ -295,7 +295,7 @@ main() {
 
   clean_generated_content
 
-  if [[ ! -d "${REPO_COPY_DIR}" ]]; then
+  if ! directory_exists "${REPO_COPY_DIR}"; then
     clone_project_repository
   fi
 

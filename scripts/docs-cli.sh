@@ -138,7 +138,7 @@ check_requirements() {
 
 clean_generated_content() {
   # remove the old generated cli docs
-  if [[ -d "${GENERATED_DOCS_DIR}" ]]; then
+  if directory_exists "${GENERATED_DOCS_DIR}"; then
     log_info "Cleaning generated cli folder (${GENERATED_DOCS_CLI_DIR})"
     if [[ "${IS_DRY_RUN}" != "true" ]]; then
       rm -rf ${ROOT_DIR}/${GENERATED_DOCS_CLI_DIR}/*
@@ -146,7 +146,7 @@ clean_generated_content() {
   fi
 
   # create a fresh generated folder if needed
-  if [[ ! -d "${GENERATED_DOCS_DIR}" ]]; then
+  if ! directory_exists "${GENERATED_DOCS_DIR}"; then
     log_debug "Creating generated docs folder (./${GENERATED_DOCS_DIR})"
     if [[ "${IS_DRY_RUN}" != "true" ]]; then
       mkdir -p "${GENERATED_DOCS_DIR}"
@@ -155,7 +155,7 @@ clean_generated_content() {
 }
 
 move_compiled_documentation() {
-  if [[ ! -d ${GENERATED_DOCS_CLI_DIR} ]]; then
+  if ! directory_exists "${GENERATED_DOCS_CLI_DIR}"; then
     log_debug "Creating directory: ${GENERATED_DOCS_CLI_DIR}"
     if [[ "${IS_DRY_RUN}" != "true" ]]; then
       mkdir -p "${GENERATED_DOCS_CLI_DIR}"
