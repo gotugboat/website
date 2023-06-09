@@ -58,15 +58,15 @@ clone_project_repository() {
   fi
 }
 
-generate_documentation() {
-  log_info "Generating the documentation"
-
+prepare_doc_generation() {
   # move document sections into the docs folder
   log_info "Copying ${DOC_TEMPLATE_DIR}/_index.md to ${GENERATED_DOCS_DIR}"
   if [[ "${IS_DRY_RUN}" != "true" ]]; then
     cp "${DOC_TEMPLATE_DIR}/_index.md" "${GENERATED_DOCS_DIR}"
   fi
+}
 
+prepare_getting_started_documentation() {
   log_info "Preparing getting started documentation"
 
   if [[ ! -d ${GENERATED_DOCS_DIR}/getting-started ]]; then
@@ -86,21 +86,25 @@ generate_documentation() {
     tugboat_docs_version=$(cat ${ROOT_DIR}/data/tugboat.yml | grep version | awk -F ': ' '{print $2}' | sed 's/^.//')
     replace_text "__TUGBOAT_VERSION__" "${tugboat_docs_version//$'\n'/\\n}" "${GENERATED_DOCS_DIR}/getting-started/installation.md"
   fi
+}
 
-  # log_info "Preparing configuration documentation"
+prepare_configuration_documentation() {
+  log_info "Preparing configuration documentation"
 
-  # if [[ ! -d ${GENERATED_DOCS_DIR}/configuration ]]; then
-  #   log_debug "Creating directory: ${GENERATED_DOCS_DIR}/configuration"
-  #   if [[ "${IS_DRY_RUN}" != "true" ]]; then
-  #     mkdir -p "${GENERATED_DOCS_DIR}/configuration"
-  #   fi
-  # fi
+  if [[ ! -d ${GENERATED_DOCS_DIR}/configuration ]]; then
+    log_debug "Creating directory: ${GENERATED_DOCS_DIR}/configuration"
+    if [[ "${IS_DRY_RUN}" != "true" ]]; then
+      mkdir -p "${GENERATED_DOCS_DIR}/configuration"
+    fi
+  fi
 
-  # if [[ "${IS_DRY_RUN}" != "true" ]]; then
-  #   log_debug "Copying configuration documentation (${DOC_TEMPLATE_DIR}/configuration -> ${GENERATED_DOCS_DIR})"
-  #   cp -r "${DOC_TEMPLATE_DIR}/configuration" "${GENERATED_DOCS_DIR}"
-  # fi
+  if [[ "${IS_DRY_RUN}" != "true" ]]; then
+    log_debug "Copying configuration documentation (${DOC_TEMPLATE_DIR}/configuration -> ${GENERATED_DOCS_DIR})"
+    cp -r "${DOC_TEMPLATE_DIR}/configuration" "${GENERATED_DOCS_DIR}"
+  fi
+}
 
+prepare_help_documentation() {
   log_info "Preparing help documentation"
 
   if [[ ! -d ${GENERATED_DOCS_DIR}/help ]]; then
@@ -114,9 +118,9 @@ generate_documentation() {
   if [[ "${IS_DRY_RUN}" != "true" ]]; then
     cp -r "${DOC_TEMPLATE_DIR}/help" "${GENERATED_DOCS_DIR}"
   fi
+}
 
-  # ==================== Generate the contributing guidelines doc page ====================
-
+generate_page_contributing_guidelines() {
   log_info "Generating the contributing guidelines page"
 
   log_debug "Setting page content"
@@ -145,9 +149,9 @@ generate_documentation() {
     remove_text="# Contributing"
     replace_text "${remove_text}" "" "${GENERATED_DOCS_DIR}/help/contribution-guidelines.md"
   fi
+}
 
-  # ==================== Generate the code of conduct page ====================
-
+generate_page_code_of_conduct() {
   log_info "Generating the code of conduct page"
 
   log_debug "Setting page content"
@@ -161,53 +165,51 @@ generate_documentation() {
     remove_text="# Contributor Covenant Code of Conduct"
     replace_text "${remove_text}" "" "${GENERATED_DOCS_DIR}/help/code-of-conduct.md"
   fi
+}
 
-  # ==================== Add the example file to the documentation ====================
+generate_page_example_file() {
+  log_info "Generating the configuration example file page"
 
-  # log_info "Adding example config file to docs"
+  log_info "Adding example config file to docs"
+  log_debug "Setting page content"
+  if [[ "${IS_DRY_RUN}" != "true" ]]; then
+    # replace / with \/ in the output
+    example_config=$(cat ${REPO_COPY_DIR}/example.tugboat.yaml | sed 's:/:\\/:g')
+    # this will replace the newline characters with the escape sequence
+    replace_text "__EXAMPLE_TUGBOAT_FILE_CONTENT__" "${example_config//$'\n'/\\n}" "${GENERATED_DOCS_DIR}/configuration/example-file.md"
+  fi
+}
 
-  # log_debug "Setting page content"
-  # if [[ "${IS_DRY_RUN}" != "true" ]]; then
-  #   # replace / with \/ in the output
-  #   example_config=$(cat ${REPO_COPY_DIR}/example.tugboat.yaml | sed 's:/:\\/:g')
-  #   # this will replace the newline characters with the escape sequence
-  #   if ! sed -i '' "s/__EXAMPLE_TUGBOAT_FILE_CONTENT__/${example_config//$'\n'/\\n}/g" ${GENERATED_DOCS_DIR}/configuration/example-file.md; then
-  #     exit 1
-  #   fi
-  # fi
-
-  # ==================== Generate the cli docs ====================
-
+generate_cli_documentation() {
   if [[ "${SKIP_CLI}" == "true" ]]; then
-    log_info "Skipping command line interface documentation" 
+    log_info "Skipping command line interface documentation"
+    return
   fi
 
-  if [[ "${SKIP_CLI}" != "true" ]]; then
-    log_info "Generating command line interface documentation"
+  log_info "Generating command line interface documentation"
 
-    gen_cli_args=""
-    if [[ "${IS_DEBUG}" == "true" ]]; then
-      gen_cli_args="${gen_cli_args} --debug"
-    fi
-
-    if [[ "${IS_DRY_RUN}" == "true" ]]; then
-      gen_cli_args="${gen_cli_args} --dry-run"
-    fi
-
-    if [[ -n "${TUGBOAT_PATH}" ]]; then
-      gen_cli_args="${gen_cli_args} --path ${TUGBOAT_PATH}"
-    fi
-
-    ./scripts/docs-cli.sh ${gen_cli_args}
-
-    rc=$?
-    if [[ "${rc}" != "0" ]]; then
-      log_err "failed to generate command line interface documentation"
-    fi
+  gen_cli_args=""
+  if [[ "${IS_DEBUG}" == "true" ]]; then
+    gen_cli_args="${gen_cli_args} --debug"
   fi
 
-  # ==================== Move the generated documentation to the docs folder ====================
+  if [[ "${IS_DRY_RUN}" == "true" ]]; then
+    gen_cli_args="${gen_cli_args} --dry-run"
+  fi
 
+  if [[ -n "${TUGBOAT_PATH}" ]]; then
+    gen_cli_args="${gen_cli_args} --path ${TUGBOAT_PATH}"
+  fi
+
+  ./scripts/docs-cli.sh ${gen_cli_args}
+
+  rc=$?
+  if [[ "${rc}" != "0" ]]; then
+    log_err "failed to generate command line interface documentation"
+  fi
+}
+
+finalize_generated_docs() {
   log_info "Finalizing generated documentation"
 
   log_debug "Moving generated documentation to ${CONTENT_DOCS_DIR}"
@@ -233,6 +235,25 @@ generate_documentation() {
   fi
 
   log_info "Documentation generation completed"
+}
+
+
+generate_documentation() {
+  log_info "Generating the documentation"
+
+  prepare_doc_generation
+
+  prepare_getting_started_documentation
+  # prepare_configuration_documentation
+  prepare_help_documentation
+
+  generate_page_contributing_guidelines
+  generate_page_code_of_conduct
+  # generate_page_example_file
+
+  generate_cli_documentation
+
+  finalize_generated_docs
 }
 
 main() {
