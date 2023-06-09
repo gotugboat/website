@@ -27,7 +27,7 @@ usage() {
 
 clean_generated_content() {
   # remove the old generated docs
-  if [[ -d "${GENERATED_DOCS_DIR}" ]]; then
+  if directory_exists "${GENERATED_DOCS_DIR}"; then
     log_info "Cleaning contents of the generated cli folder (./${GENERATED_DOCS_DIR})"
     if [[ "${IS_DRY_RUN}" != "true" ]]; then
       rm -rf ${GENERATED_DOCS_DIR}/*
@@ -35,7 +35,7 @@ clean_generated_content() {
   fi
 
   # create a fresh generated folder if needed
-  if [[ ! -d "${GENERATED_DOCS_DIR}" ]]; then
+  if ! directory_exists "${GENERATED_DOCS_DIR}"; then
     log_debug "Creating generated docs folder (./${GENERATED_DOCS_DIR})"
     if [[ "${IS_DRY_RUN}" != "true" ]]; then
       mkdir -p "${GENERATED_DOCS_DIR}"
@@ -58,18 +58,18 @@ clone_project_repository() {
   fi
 }
 
-generate_documentation() {
-  log_info "Generating the documentation"
-
+prepare_doc_generation() {
   # move document sections into the docs folder
   log_info "Copying ${DOC_TEMPLATE_DIR}/_index.md to ${GENERATED_DOCS_DIR}"
   if [[ "${IS_DRY_RUN}" != "true" ]]; then
     cp "${DOC_TEMPLATE_DIR}/_index.md" "${GENERATED_DOCS_DIR}"
   fi
+}
 
+prepare_getting_started_documentation() {
   log_info "Preparing getting started documentation"
 
-  if [[ ! -d ${GENERATED_DOCS_DIR}/getting-started ]]; then
+  if ! directory_exists "${GENERATED_DOCS_DIR}/getting-started"; then
     log_debug "Creating directory: ${GENERATED_DOCS_DIR}/getting-started"
     if [[ "${IS_DRY_RUN}" != "true" ]]; then
       mkdir -p "${GENERATED_DOCS_DIR}/getting-started"
@@ -84,28 +84,30 @@ generate_documentation() {
   log_debug "Setting install version number"
   if [[ "${IS_DRY_RUN}" != "true" ]]; then
     tugboat_docs_version=$(cat ${ROOT_DIR}/data/tugboat.yml | grep version | awk -F ': ' '{print $2}' | sed 's/^.//')
-    if ! sed -i '' "s/__TUGBOAT_VERSION__/${tugboat_docs_version//$'\n'/\\n}/g"  ${GENERATED_DOCS_DIR}/getting-started/installation.md; then
-      exit 1
+    replace_text "__TUGBOAT_VERSION__" "${tugboat_docs_version//$'\n'/\\n}" "${GENERATED_DOCS_DIR}/getting-started/installation.md"
+  fi
+}
+
+prepare_configuration_documentation() {
+  log_info "Preparing configuration documentation"
+
+  if ! directory_exists "${GENERATED_DOCS_DIR}/configuration"; then
+    log_debug "Creating directory: ${GENERATED_DOCS_DIR}/configuration"
+    if [[ "${IS_DRY_RUN}" != "true" ]]; then
+      mkdir -p "${GENERATED_DOCS_DIR}/configuration"
     fi
   fi
 
-  # log_info "Preparing configuration documentation"
+  if [[ "${IS_DRY_RUN}" != "true" ]]; then
+    log_debug "Copying configuration documentation (${DOC_TEMPLATE_DIR}/configuration -> ${GENERATED_DOCS_DIR})"
+    cp -r "${DOC_TEMPLATE_DIR}/configuration" "${GENERATED_DOCS_DIR}"
+  fi
+}
 
-  # if [[ ! -d ${GENERATED_DOCS_DIR}/configuration ]]; then
-  #   log_debug "Creating directory: ${GENERATED_DOCS_DIR}/configuration"
-  #   if [[ "${IS_DRY_RUN}" != "true" ]]; then
-  #     mkdir -p "${GENERATED_DOCS_DIR}/configuration"
-  #   fi
-  # fi
-
-  # if [[ "${IS_DRY_RUN}" != "true" ]]; then
-  #   log_debug "Copying configuration documentation (${DOC_TEMPLATE_DIR}/configuration -> ${GENERATED_DOCS_DIR})"
-  #   cp -r "${DOC_TEMPLATE_DIR}/configuration" "${GENERATED_DOCS_DIR}"
-  # fi
-
+prepare_help_documentation() {
   log_info "Preparing help documentation"
 
-  if [[ ! -d ${GENERATED_DOCS_DIR}/help ]]; then
+  if ! directory_exists "${GENERATED_DOCS_DIR}/help"; then
     log_debug "Creating directory: ${GENERATED_DOCS_DIR}/help"
     if [[ "${IS_DRY_RUN}" != "true" ]]; then
       mkdir -p "${GENERATED_DOCS_DIR}/help"
@@ -116,17 +118,15 @@ generate_documentation() {
   if [[ "${IS_DRY_RUN}" != "true" ]]; then
     cp -r "${DOC_TEMPLATE_DIR}/help" "${GENERATED_DOCS_DIR}"
   fi
+}
 
-  # ==================== Generate the contributing guidelines doc page ====================
-
+generate_page_contributing_guidelines() {
   log_info "Generating the contributing guidelines page"
 
   log_debug "Setting page content"
   if [[ "${IS_DRY_RUN}" != "true" ]]; then
     contribution_guidelines=$(cat ${REPO_COPY_DIR}/.github/CONTRIBUTING.md | sed 's:/:\\/:g')
-    if ! sed -i '' "s/__TUGBOAT_CONTRIBUTION_GUIDELINES__/${contribution_guidelines//$'\n'/\\n}/g"  ${GENERATED_DOCS_DIR}/help/contribution-guidelines.md; then
-      exit 1
-    fi
+    replace_text "__TUGBOAT_CONTRIBUTION_GUIDELINES__" "${contribution_guidelines//$'\n'/\\n}" "${GENERATED_DOCS_DIR}/help/contribution-guidelines.md"
   fi
 
   # fix the markdown links to reference correctly
@@ -134,99 +134,87 @@ generate_documentation() {
   log_debug "Replace license markdown links to reference back to github"
   if [[ "${IS_DRY_RUN}" != "true" ]]; then
     license_url=$(echo github.com/${REPOSITORY}/blob/main/LICENSE | sed 's:/:\\/:g')
-    if ! sed -i '' "s/\.\.\/LICENSE/https:\/\/${license_url//$'\n'/\\n}/g"  ${GENERATED_DOCS_DIR}/help/contribution-guidelines.md; then
-      exit 1
-    fi
+    replace_text "\.\.\/LICENSE" "https:\/\/${license_url//$'\n'/\\n}" "${GENERATED_DOCS_DIR}/help/contribution-guidelines.md"
   fi
 
   # replace ./CODE_OF_CONDUCT.md with https://github.com/gotugboat/tugboat/tree/main/.github/
   log_debug "Replace code of conduct markdown links to reference back to github"
   if [[ "${IS_DRY_RUN}" != "true" ]]; then
     code_of_conduct_url="{{< relref \"code-of-conduct\" >}}"
-    if ! sed -i '' "s/\.\/CODE_OF_CONDUCT\.md/${code_of_conduct_url//$'\n'/\\n}/g"  ${GENERATED_DOCS_DIR}/help/contribution-guidelines.md; then
-      exit 1
-    fi
+    replace_text "\.\/CODE_OF_CONDUCT\.md" "${code_of_conduct_url//$'\n'/\\n}" "${GENERATED_DOCS_DIR}/help/contribution-guidelines.md"
   fi
 
   log_debug "Modifying page content"
   if [[ "${IS_DRY_RUN}" != "true" ]]; then
     remove_text="# Contributing"
-    if ! sed -i '' "s/${remove_text}//g"  ${GENERATED_DOCS_DIR}/help/contribution-guidelines.md; then
-      exit 1
-    fi
+    replace_text "${remove_text}" "" "${GENERATED_DOCS_DIR}/help/contribution-guidelines.md"
   fi
+}
 
-  # ==================== Generate the code of conduct page ====================
-
+generate_page_code_of_conduct() {
   log_info "Generating the code of conduct page"
 
   log_debug "Setting page content"
   if [[ "${IS_DRY_RUN}" != "true" ]]; then
     code_of_conduct=$(cat ${REPO_COPY_DIR}/.github/CODE_OF_CONDUCT.md | sed 's:/:\\/:g')
-    if ! sed -i '' "s/__TUGBOAT_CODE_OF_CONDUCT__/${code_of_conduct//$'\n'/\\n}/g"  ${GENERATED_DOCS_DIR}/help/code-of-conduct.md; then
-      exit 1
-    fi
+    replace_text "__TUGBOAT_CODE_OF_CONDUCT__" "${code_of_conduct//$'\n'/\\n}" "${GENERATED_DOCS_DIR}/help/code-of-conduct.md"
   fi
 
   log_debug "Modifying page content"
   if [[ "${IS_DRY_RUN}" != "true" ]]; then
     remove_text="# Contributor Covenant Code of Conduct"
-    if ! sed -i '' "s/${remove_text}//g"  ${GENERATED_DOCS_DIR}/help/code-of-conduct.md; then
-      exit 1
-    fi
+    replace_text "${remove_text}" "" "${GENERATED_DOCS_DIR}/help/code-of-conduct.md"
   fi
+}
 
-  # ==================== Add the example file to the documentation ====================
+generate_page_example_file() {
+  log_info "Generating the configuration example file page"
 
-  # log_info "Adding example config file to docs"
+  log_info "Adding example config file to docs"
+  log_debug "Setting page content"
+  if [[ "${IS_DRY_RUN}" != "true" ]]; then
+    # replace / with \/ in the output
+    example_config=$(cat ${REPO_COPY_DIR}/example.tugboat.yaml | sed 's:/:\\/:g')
+    # this will replace the newline characters with the escape sequence
+    replace_text "__EXAMPLE_TUGBOAT_FILE_CONTENT__" "${example_config//$'\n'/\\n}" "${GENERATED_DOCS_DIR}/configuration/example-file.md"
+  fi
+}
 
-  # log_debug "Setting page content"
-  # if [[ "${IS_DRY_RUN}" != "true" ]]; then
-  #   # replace / with \/ in the output
-  #   example_config=$(cat ${REPO_COPY_DIR}/example.tugboat.yaml | sed 's:/:\\/:g')
-  #   # this will replace the newline characters with the escape sequence
-  #   if ! sed -i '' "s/__EXAMPLE_TUGBOAT_FILE_CONTENT__/${example_config//$'\n'/\\n}/g" ${GENERATED_DOCS_DIR}/configuration/example-file.md; then
-  #     exit 1
-  #   fi
-  # fi
-
-  # ==================== Generate the cli docs ====================
-
+generate_cli_documentation() {
   if [[ "${SKIP_CLI}" == "true" ]]; then
-    log_info "Skipping command line interface documentation" 
+    log_info "Skipping command line interface documentation"
+    return
   fi
 
-  if [[ "${SKIP_CLI}" != "true" ]]; then
-    log_info "Generating command line interface documentation"
+  log_info "Generating command line interface documentation"
 
-    gen_cli_args=""
-    if [[ "${IS_DEBUG}" == "true" ]]; then
-      gen_cli_args="${gen_cli_args} --debug"
-    fi
-
-    if [[ "${IS_DRY_RUN}" == "true" ]]; then
-      gen_cli_args="${gen_cli_args} --dry-run"
-    fi
-
-    if [[ -n "${TUGBOAT_PATH}" ]]; then
-      gen_cli_args="${gen_cli_args} --path ${TUGBOAT_PATH}"
-    fi
-
-    ./scripts/docs-cli.sh ${gen_cli_args}
-
-    rc=$?
-    if [[ "${rc}" != "0" ]]; then
-      log_err "failed to generate command line interface documentation"
-    fi
+  gen_cli_args=""
+  if [[ "${IS_DEBUG}" == "true" ]]; then
+    gen_cli_args="${gen_cli_args} --debug"
   fi
 
-  # ==================== Move the generated documentation to the docs folder ====================
+  if [[ "${IS_DRY_RUN}" == "true" ]]; then
+    gen_cli_args="${gen_cli_args} --dry-run"
+  fi
 
+  if [[ -n "${TUGBOAT_PATH}" ]]; then
+    gen_cli_args="${gen_cli_args} --path ${TUGBOAT_PATH}"
+  fi
+
+  ./scripts/docs-cli.sh ${gen_cli_args}
+
+  rc=$?
+  if [[ "${rc}" != "0" ]]; then
+    log_err "failed to generate command line interface documentation"
+  fi
+}
+
+finalize_generated_docs() {
   log_info "Finalizing generated documentation"
 
   log_debug "Moving generated documentation to ${CONTENT_DOCS_DIR}"
   # If everything so far as worked, remove the old docs
-  if [[ -d "${CONTENT_DOCS_DIR}" ]]; then
+  if directory_exists "${CONTENT_DOCS_DIR}"; then
     log_debug "Cleaning existing content docs folder"
     if [[ "${IS_DRY_RUN}" != "true" ]]; then
       rm -r "${CONTENT_DOCS_DIR}"
@@ -234,7 +222,7 @@ generate_documentation() {
   fi
 
   # create the fresh docs folder
-  if [[ ! -d "${CONTENT_DOCS_DIR}" ]]; then
+  if ! directory_exists "${CONTENT_DOCS_DIR}"; then
     log_debug "Creating folder (${CONTENT_DOCS_DIR})"
     if [[ "${IS_DRY_RUN}" != "true" ]]; then
       mkdir -p "${CONTENT_DOCS_DIR}"
@@ -247,6 +235,25 @@ generate_documentation() {
   fi
 
   log_info "Documentation generation completed"
+}
+
+
+generate_documentation() {
+  log_info "Generating the documentation"
+
+  prepare_doc_generation
+
+  prepare_getting_started_documentation
+  # prepare_configuration_documentation
+  prepare_help_documentation
+
+  generate_page_contributing_guidelines
+  generate_page_code_of_conduct
+  # generate_page_example_file
+
+  generate_cli_documentation
+
+  finalize_generated_docs
 }
 
 main() {
@@ -288,7 +295,7 @@ main() {
 
   clean_generated_content
 
-  if [[ ! -d "${REPO_COPY_DIR}" ]]; then
+  if ! directory_exists "${REPO_COPY_DIR}"; then
     clone_project_repository
   fi
 

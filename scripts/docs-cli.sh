@@ -81,9 +81,7 @@ template_root_command() {
       fi
   done <<< "$available_commands"
 
-  if ! sed -i '' "s/__SEE_ALSO_SECTION__/${see_also}/g" "${file}"; then
-    exit 1
-  fi
+  replace_text "__SEE_ALSO_SECTION__" "${see_also}" "${file}"
 }
 
 execute_tugboat_command() {
@@ -140,7 +138,7 @@ check_requirements() {
 
 clean_generated_content() {
   # remove the old generated cli docs
-  if [[ -d "${GENERATED_DOCS_DIR}" ]]; then
+  if directory_exists "${GENERATED_DOCS_DIR}"; then
     log_info "Cleaning generated cli folder (${GENERATED_DOCS_CLI_DIR})"
     if [[ "${IS_DRY_RUN}" != "true" ]]; then
       rm -rf ${ROOT_DIR}/${GENERATED_DOCS_CLI_DIR}/*
@@ -148,7 +146,7 @@ clean_generated_content() {
   fi
 
   # create a fresh generated folder if needed
-  if [[ ! -d "${GENERATED_DOCS_DIR}" ]]; then
+  if ! directory_exists "${GENERATED_DOCS_DIR}"; then
     log_debug "Creating generated docs folder (./${GENERATED_DOCS_DIR})"
     if [[ "${IS_DRY_RUN}" != "true" ]]; then
       mkdir -p "${GENERATED_DOCS_DIR}"
@@ -157,7 +155,7 @@ clean_generated_content() {
 }
 
 move_compiled_documentation() {
-  if [[ ! -d ${GENERATED_DOCS_CLI_DIR} ]]; then
+  if ! directory_exists "${GENERATED_DOCS_CLI_DIR}"; then
     log_debug "Creating directory: ${GENERATED_DOCS_CLI_DIR}"
     if [[ "${IS_DRY_RUN}" != "true" ]]; then
       mkdir -p "${GENERATED_DOCS_CLI_DIR}"
@@ -310,72 +308,52 @@ generate_documentation() {
 
     log_debug "Updating document draft status"
     if [[ "${IS_DRY_RUN}" != "true" ]]; then
-      if ! sed -i '' "s/draft: true/draft: false/g" "$filename"; then
-        exit 1
-      fi
+      replace_text "draft: true" "draft: false" "$filename"
     fi
 
     log_debug "Updating document weight"
     if [[ "${IS_DRY_RUN}" != "true" ]]; then
-      if ! sed -i '' "s/weight: 140/weight: ${command_weight}/g" "$filename"; then
-        exit 1
-      fi
+      replace_text "weight: 140" "weight: ${command_weight}" "$filename"
     fi
 
     log_debug "Updating document title"
     if [[ "${IS_DRY_RUN}" != "true" ]]; then
-      if ! sed -i '' "s/__TITLE__/${doc_tile}/g" $filename; then
-        exit 1
-      fi
+      replace_text "__TITLE__" "${doc_tile}" "$filename"
     fi
 
     log_debug "Updating document short description"
     if [[ "${IS_DRY_RUN}" != "true" ]]; then
-      if ! sed -i '' "s/__COBRA_SHORT_DESCRIPTION__/${doc_desc}/g" $filename; then
-        exit 1
-      fi
+      replace_text "__COBRA_SHORT_DESCRIPTION__" "${doc_desc}" "$filename"
     fi
 
     log_debug "Updating document usage"
     if [[ "${IS_DRY_RUN}" != "true" ]]; then
-      if ! sed -i '' "s/__TUGBOAT_USAGE__/${doc_usage}/g" $filename; then
-        exit 1
-      fi
+      replace_text "__TUGBOAT_USAGE__" "${doc_usage}" "$filename"
     fi
 
     log_debug "Updating document command options"
     if [[ "${IS_DRY_RUN}" != "true" ]]; then
-      if ! sed -i '' "s/__TUGBOAT_COMMAND_OPTIONS__/${doc_command_options}/g" $filename; then
-        exit 1
-      fi
+      replace_text "__TUGBOAT_COMMAND_OPTIONS__" "${doc_command_options}" "$filename"
     fi
 
     log_debug "Updating document global options"
     if [[ "${IS_DRY_RUN}" != "true" ]]; then
-      if ! sed -i '' "s/__TUGBOAT_GLOBAL_OPTIONS__/${doc_global_options}/g" $filename; then
-        exit 1
-      fi
+      replace_text "__TUGBOAT_GLOBAL_OPTIONS__" "${doc_global_options}" "$filename"
     fi
 
     log_debug "Updating document parent command"
     if [[ "${IS_DRY_RUN}" != "true" ]]; then
-      if ! sed -i '' "s/__PARENT_COMMAND__/${doc_parent_cmd}/g" $filename; then
-        exit 1
-      fi
+      replace_text "__PARENT_COMMAND__" "${doc_parent_cmd}" "$filename"
     fi
 
     log_debug "Updating document parent ref"
     if [[ "${IS_DRY_RUN}" != "true" ]]; then
-      if ! sed -i '' "s/__PARENT_COMMAND_REF__/${doc_parent_ref}/g" $filename; then
-        exit 1
-      fi
+      replace_text "__PARENT_COMMAND_REF__" "${doc_parent_ref}" "$filename"
     fi
 
     log_debug "Updating document parent description"
     if [[ "${IS_DRY_RUN}" != "true" ]]; then
-      if ! sed -i '' "s/__PARENT_COMMAND_DESCRIPTION__/${doc_parent_cmd_desc}/g" $filename; then
-        exit 1
-      fi
+      replace_text "__PARENT_COMMAND_DESCRIPTION__" "${doc_parent_cmd_desc}" "$filename"
     fi
 
     # increase the command document weight
