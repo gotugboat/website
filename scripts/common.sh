@@ -47,6 +47,44 @@ log_err() {
   printf "${RED}ERRO:${RESET} %s\n" "$*"
 }
 
+# A function to terminate a program with an error message
+exit_err() {
+  local message="$1"
+
+  log_err "$message"
+  exit 1
+}
+
+# A function that returns true if a directory exists, false otherwise
+directory_exists() {
+  [[ -d "$1" ]]
+}
+
+# A function that returns true if a file exists, false otherwise
+file_exists() {
+  [[ -f "$1" ]]
+}
+
+# A function to replace a string using three arguments: the pattern to search
+# for, the replacement text, and the file to modify.
+# Example usage:
+#   replace_text "foo" "bar" "file.txt"
+replace_text() {
+  local pattern="$1"
+  local replacement="$2"
+  local file="$3"
+
+  if ! file_exists "$file"; then
+    exit_err "The file '$file' does not exist"
+  fi
+
+  if [[ $(uname) == "Darwin" ]]; then
+    sed -i '' "s/$pattern/$replacement/g" "$file" || exit_err "Failed to replace text using sed"
+  else
+    sed -i "s/$pattern/$replacement/g" "$file" || exit_err "Failed to replace text using sed"
+  fi
+}
+
 # A function to trim white spaces from the right of a string
 # Example usage:
 #   trimmed_string=$(trim "   myString   ")
