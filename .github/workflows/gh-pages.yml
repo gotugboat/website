@@ -21,7 +21,7 @@ concurrency:
 jobs:
   build:
     env:
-      TUGBOAT_PATH: '${{ github.workspace }}/tugboat'
+      TUGBOAT_PATH: '${{ github.workspace }}/repos/tugboat'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -62,8 +62,7 @@ jobs:
 
       - name: Build
         run: |
-          ./load-docs.sh --path ${{ env.TUGBOAT_PATH }}
-          make public
+          make docs public
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
