@@ -89,19 +89,19 @@ generate_documentation() {
     fi
   fi
 
-  log_info "Preparing configuration documentation"
+  # log_info "Preparing configuration documentation"
 
-  if [[ ! -d ${GENERATED_DOCS_DIR}/configuration ]]; then
-    log_debug "Creating directory: ${GENERATED_DOCS_DIR}/configuration"
-    if [[ "${IS_DRY_RUN}" != "true" ]]; then
-      mkdir -p "${GENERATED_DOCS_DIR}/configuration"
-    fi
-  fi
+  # if [[ ! -d ${GENERATED_DOCS_DIR}/configuration ]]; then
+  #   log_debug "Creating directory: ${GENERATED_DOCS_DIR}/configuration"
+  #   if [[ "${IS_DRY_RUN}" != "true" ]]; then
+  #     mkdir -p "${GENERATED_DOCS_DIR}/configuration"
+  #   fi
+  # fi
 
-  if [[ "${IS_DRY_RUN}" != "true" ]]; then
-    log_debug "Copying configuration documentation (${DOC_TEMPLATE_DIR}/configuration -> ${GENERATED_DOCS_DIR})"
-    cp -r "${DOC_TEMPLATE_DIR}/configuration" "${GENERATED_DOCS_DIR}"
-  fi
+  # if [[ "${IS_DRY_RUN}" != "true" ]]; then
+  #   log_debug "Copying configuration documentation (${DOC_TEMPLATE_DIR}/configuration -> ${GENERATED_DOCS_DIR})"
+  #   cp -r "${DOC_TEMPLATE_DIR}/configuration" "${GENERATED_DOCS_DIR}"
+  # fi
 
   log_info "Preparing help documentation"
 
@@ -112,7 +112,7 @@ generate_documentation() {
     fi
   fi
 
-  log_debug "Copying configuration documentation (${DOC_TEMPLATE_DIR}/help -> ${GENERATED_DOCS_DIR})"
+  log_debug "Copying help documentation (${DOC_TEMPLATE_DIR}/help -> ${GENERATED_DOCS_DIR})"
   if [[ "${IS_DRY_RUN}" != "true" ]]; then
     cp -r "${DOC_TEMPLATE_DIR}/help" "${GENERATED_DOCS_DIR}"
   fi
@@ -178,17 +178,17 @@ generate_documentation() {
 
   # ==================== Add the example file to the documentation ====================
 
-  log_info "Adding example config file to docs"
+  # log_info "Adding example config file to docs"
 
-  log_debug "Setting page content"
-  if [[ "${IS_DRY_RUN}" != "true" ]]; then
-    # replace / with \/ in the output
-    example_config=$(cat ${REPO_COPY_DIR}/example.tugboat.yaml | sed 's:/:\\/:g')
-    # this will replace the newline characters with the escape sequence
-    if ! sed -i '' "s/__EXAMPLE_TUGBOAT_FILE_CONTENT__/${example_config//$'\n'/\\n}/g" ${GENERATED_DOCS_DIR}/configuration/example-file.md; then
-      exit 1
-    fi
-  fi
+  # log_debug "Setting page content"
+  # if [[ "${IS_DRY_RUN}" != "true" ]]; then
+  #   # replace / with \/ in the output
+  #   example_config=$(cat ${REPO_COPY_DIR}/example.tugboat.yaml | sed 's:/:\\/:g')
+  #   # this will replace the newline characters with the escape sequence
+  #   if ! sed -i '' "s/__EXAMPLE_TUGBOAT_FILE_CONTENT__/${example_config//$'\n'/\\n}/g" ${GENERATED_DOCS_DIR}/configuration/example-file.md; then
+  #     exit 1
+  #   fi
+  # fi
 
   # ==================== Generate the cli docs ====================
 
