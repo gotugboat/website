@@ -84,9 +84,7 @@ generate_documentation() {
   log_debug "Setting install version number"
   if [[ "${IS_DRY_RUN}" != "true" ]]; then
     tugboat_docs_version=$(cat ${ROOT_DIR}/data/tugboat.yml | grep version | awk -F ': ' '{print $2}' | sed 's/^.//')
-    if ! sed -i '' "s/__TUGBOAT_VERSION__/${tugboat_docs_version//$'\n'/\\n}/g"  ${GENERATED_DOCS_DIR}/getting-started/installation.md; then
-      exit 1
-    fi
+    replace_text "__TUGBOAT_VERSION__" "${tugboat_docs_version//$'\n'/\\n}" "${GENERATED_DOCS_DIR}/getting-started/installation.md"
   fi
 
   # log_info "Preparing configuration documentation"
@@ -124,9 +122,7 @@ generate_documentation() {
   log_debug "Setting page content"
   if [[ "${IS_DRY_RUN}" != "true" ]]; then
     contribution_guidelines=$(cat ${REPO_COPY_DIR}/.github/CONTRIBUTING.md | sed 's:/:\\/:g')
-    if ! sed -i '' "s/__TUGBOAT_CONTRIBUTION_GUIDELINES__/${contribution_guidelines//$'\n'/\\n}/g"  ${GENERATED_DOCS_DIR}/help/contribution-guidelines.md; then
-      exit 1
-    fi
+    replace_text "__TUGBOAT_CONTRIBUTION_GUIDELINES__" "${contribution_guidelines//$'\n'/\\n}" "${GENERATED_DOCS_DIR}/help/contribution-guidelines.md"
   fi
 
   # fix the markdown links to reference correctly
@@ -134,26 +130,20 @@ generate_documentation() {
   log_debug "Replace license markdown links to reference back to github"
   if [[ "${IS_DRY_RUN}" != "true" ]]; then
     license_url=$(echo github.com/${REPOSITORY}/blob/main/LICENSE | sed 's:/:\\/:g')
-    if ! sed -i '' "s/\.\.\/LICENSE/https:\/\/${license_url//$'\n'/\\n}/g"  ${GENERATED_DOCS_DIR}/help/contribution-guidelines.md; then
-      exit 1
-    fi
+    replace_text "\.\.\/LICENSE" "https:\/\/${license_url//$'\n'/\\n}" "${GENERATED_DOCS_DIR}/help/contribution-guidelines.md"
   fi
 
   # replace ./CODE_OF_CONDUCT.md with https://github.com/gotugboat/tugboat/tree/main/.github/
   log_debug "Replace code of conduct markdown links to reference back to github"
   if [[ "${IS_DRY_RUN}" != "true" ]]; then
     code_of_conduct_url="{{< relref \"code-of-conduct\" >}}"
-    if ! sed -i '' "s/\.\/CODE_OF_CONDUCT\.md/${code_of_conduct_url//$'\n'/\\n}/g"  ${GENERATED_DOCS_DIR}/help/contribution-guidelines.md; then
-      exit 1
-    fi
+    replace_text "\.\/CODE_OF_CONDUCT\.md" "${code_of_conduct_url//$'\n'/\\n}" "${GENERATED_DOCS_DIR}/help/contribution-guidelines.md"
   fi
 
   log_debug "Modifying page content"
   if [[ "${IS_DRY_RUN}" != "true" ]]; then
     remove_text="# Contributing"
-    if ! sed -i '' "s/${remove_text}//g"  ${GENERATED_DOCS_DIR}/help/contribution-guidelines.md; then
-      exit 1
-    fi
+    replace_text "${remove_text}" "" "${GENERATED_DOCS_DIR}/help/contribution-guidelines.md"
   fi
 
   # ==================== Generate the code of conduct page ====================
@@ -163,17 +153,13 @@ generate_documentation() {
   log_debug "Setting page content"
   if [[ "${IS_DRY_RUN}" != "true" ]]; then
     code_of_conduct=$(cat ${REPO_COPY_DIR}/.github/CODE_OF_CONDUCT.md | sed 's:/:\\/:g')
-    if ! sed -i '' "s/__TUGBOAT_CODE_OF_CONDUCT__/${code_of_conduct//$'\n'/\\n}/g"  ${GENERATED_DOCS_DIR}/help/code-of-conduct.md; then
-      exit 1
-    fi
+    replace_text "__TUGBOAT_CODE_OF_CONDUCT__" "${code_of_conduct//$'\n'/\\n}" "${GENERATED_DOCS_DIR}/help/code-of-conduct.md"
   fi
 
   log_debug "Modifying page content"
   if [[ "${IS_DRY_RUN}" != "true" ]]; then
     remove_text="# Contributor Covenant Code of Conduct"
-    if ! sed -i '' "s/${remove_text}//g"  ${GENERATED_DOCS_DIR}/help/code-of-conduct.md; then
-      exit 1
-    fi
+    replace_text "${remove_text}" "" "${GENERATED_DOCS_DIR}/help/code-of-conduct.md"
   fi
 
   # ==================== Add the example file to the documentation ====================
