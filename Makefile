@@ -45,7 +45,7 @@ docs:
 .PHONY: docs\:generate
 docs\:generate:
 	$(info ******************** generating docs ********************)
-	./load-docs.sh
+	./load-docs.sh --path ./repos/tugboat
 
 .PHONY: docs\:clean
 docs\:clean:
