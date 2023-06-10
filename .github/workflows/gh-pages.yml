@@ -21,7 +21,7 @@ concurrency:
 jobs:
   build:
     env:
-      TUGBOAT_PATH: '${{ github.workspace }}/tugboat'
+      TUGBOAT_PATH: '${{ github.workspace }}/repos/tugboat'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -60,10 +60,14 @@ jobs:
         with:
           go-version-file: '${{ env.TUGBOAT_PATH }}/go.mod'
 
+      - name: Download Go Dependencies
+        run: |
+          cd "${{ env.TUGBOAT_PATH }}"
+          go mod download
+
       - name: Build
         run: |
-          ./load-docs.sh --path ${{ env.TUGBOAT_PATH }}
-          make public
+          IS_DEBUG=true make docs public
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
