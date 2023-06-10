@@ -62,6 +62,7 @@ jobs:
 
       - name: Build
         run: |
+          export IS_DEBUG=true
           make docs public
 
       - name: Upload artifact
