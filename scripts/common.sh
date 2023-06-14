@@ -55,6 +55,14 @@ exit_err() {
   exit 1
 }
 
+# A function to check if a string contains a substring
+contains() {
+  local string="$1"
+  local substring="$2"
+
+  [[ "${string}" == *"${substring}"* ]]
+}
+
 # A function that returns true if a directory exists, false otherwise
 directory_exists() {
   [[ -d "$1" ]]
@@ -63,6 +71,16 @@ directory_exists() {
 # A function that returns true if a file exists, false otherwise
 file_exists() {
   [[ -f "$1" ]]
+}
+
+# A function to check if a string starts with a prefix
+starts_with() {
+  [[ "$1" == "$2"* ]]
+}
+
+# A function to check if a string ends with a suffix
+ends_with() {
+  [[ "$1" == *"$2" ]]
 }
 
 # A function to replace a string using three arguments: the pattern to search
