@@ -29,6 +29,66 @@ usage() {
   echo ""
 }
 
+# Removes the type hint from the help string
+# i.e. The input: '--flag type some text'
+# returns: '--flag some text'
+remove_type_hint() {
+  local string="$1"
+  local type_hints="strings,string,bool"
+
+  # Convert comma separated string to space separated string to loop
+  local remove_strings=$(echo ${type_hints} | sed 's/,/ /g')
+
+  local match=""
+  local value=""
+  local replaced_string="${string}"
+
+  for str in $remove_strings; do
+    match=$(echo "${replaced_string}" | grep -oE -- "--\w+((-\w+)+)?" | head -n 1)
+    value=$(echo "${replaced_string}" | grep -oE -- "--\w+((-\w+)+)?\s${str}")
+    if [[ -n ${value} ]]; then
+      replaced_string=$(echo "${replaced_string}" | sed -E "s/--[[:alnum:]]+((-[[:alnum:]]+)+)?[[:space:]]${str}/${match}/g")
+    fi
+  done
+
+  echo "${replaced_string}"
+}
+
+# Parse the help string for the default value
+get_default_value_from_help() {
+  local help_line="$1"
+
+  local match=$(echo "${help_line}" | grep -oE -- "\(default\s"[[:graph:]]+"\)" | head -n 1)
+  # find and set the default value to the text between the default output
+  local default_value="$(echo "$match" | awk -F '[()]' '{print $2;}' | awk -F '[""]' '{print $2;}')"
+
+  echo "${default_value}"
+}
+
+# Parse a line from the help string and returns the cleaned up description output
+get_description_from_help() {
+  local help_line="$1"
+  local description=""
+
+  description=$(echo "${help_line}" | awk '{print $0;}')
+
+  # replace the default comment with nothing
+  description=$(echo "${description}" | sed 's/ (default .*//')
+
+  description="$(remove_type_hint "${description}")"
+
+  # remove the flags from description
+  local name_shorthand=$(echo "${help_line}" | awk '{print $1;}')
+  if contains "${name_shorthand}" ","; then
+    description=$(echo "${description}" | awk '{$1=$2=""; print $0;}')
+  else
+    description=$(echo "${description}" | awk '{$1=""; print $0;}')
+  fi
+  description=$(trim "${description}")
+
+  echo "${description}"
+}
+
 # Generate a markdown table given a cli flag section as a string
 # i.e.
 #   -c, --config string             Custom path to a configuration file (optional)
