@@ -98,21 +98,16 @@ create_markdown_table() {
   table="${table}\n| --------------- | ------- | ----------- |"
 
   while read -r line; do
-      name_shorthand=$(echo "$line" | awk '{print $1;}')
-      default_value="$(echo "$line" | awk -F '[()]' '{print $2;}' | awk -F '[""]' '{print $2;}')"
-      description=$(echo "$line" | awk '{$1=$2=""; print $0;}')
-
-      # handle the shortname lines
-      if [[ "${name_shorthand:0-1}" == "," ]]; then
-        name_shorthand=$(echo "$line" | awk '{print $1,$2;}')
+      name_shorthand=$(echo "${line}" | awk '{print $1;}')
+      # handle the lines with a shortname flag
+      if ends_with "${name_shorthand}" ","; then
+        name_shorthand=$(echo "${line}" | awk '{print $1,$2;}')
       fi
-      # replace the default comment with nothing
-      description=$(echo "$description" | sed 's/ (default .*//')
-      # clean the description of leading words
-      description="$(echo "$description" | sed 's/strings//g; s/string//g; s/bool//g')"
-      description=$(trim "${description}")
-      # append to the table
-      table="${table}\n| $name_shorthand | ${default_value} | $description |"
+
+      default_value=$(get_default_value_from_help "${line}")
+      description=$(get_description_from_help "${line}")
+
+      table="${table}\n| ${name_shorthand} | ${default_value} | ${description} |"
   done <<< "$1"
   echo "${table}"
 }
