@@ -244,12 +244,12 @@ generate_documentation() {
   prepare_doc_generation
 
   prepare_getting_started_documentation
-  # prepare_configuration_documentation
+  prepare_configuration_documentation
   prepare_help_documentation
 
   generate_page_contributing_guidelines
   generate_page_code_of_conduct
-  # generate_page_example_file
+  generate_page_example_file
 
   generate_cli_documentation
 
