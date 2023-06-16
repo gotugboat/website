@@ -104,3 +104,4 @@ tugboat --version
 
 ## See also
 - [Quick Start]({{< relref "quick-start" >}})
+- [Configuration]({{< ref "docs/configuration/overview" >}})

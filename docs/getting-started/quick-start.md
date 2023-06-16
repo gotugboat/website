@@ -71,6 +71,7 @@ Resulting manifests lists:
   - `docker.io/gotugboat/my-image:arm64-latest`
 
 ## See also
+- [Configuration]({{< ref "/docs/configuration/overview" >}})
 - [tugboat build]({{< ref "/docs/cli/tugboat-build" >}})
 - [tugboat tag]({{< ref "/docs/cli/tugboat-build" >}})
 - [tugboat manifest]({{< ref "/docs/cli/tugboat-build" >}})
