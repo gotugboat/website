@@ -368,7 +368,7 @@ generate_documentation() {
 
     log_debug "Updating document weight"
     if [[ "${IS_DRY_RUN}" != "true" ]]; then
-      replace_text "weight: 140" "weight: ${command_weight}" "$filename"
+      replace_text "weight: 340" "weight: ${command_weight}" "$filename"
     fi
 
     log_debug "Updating document title"
