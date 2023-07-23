@@ -26,10 +26,10 @@ Configurations are read in the following order, with the top of this list taking
 
 | Env                                           | Function                                                         |
 |-----------------------------------------------|------------------------------------------------------------------|
-| `DOCKER_REGISTRY="docker.io"`                 | The docker registry to use                                       |
-| `DOCKER_NAMESPACE="namespace"`                | The namespace on the docker registry to use                      |
-| `DOCKER_USER="username"`                      | The username credential with access to the registry              |
-| `DOCKER_PASS="password"`                      | The password credential with access to the registry              |
+| `REGISTRY_URL="docker.io"`                    | The registry to use                                              |
+| `REGISTRY_NAMESPACE="namespace"`              | The namespace on the registry to use                             |
+| `REGISTRY_USER="username"`                    | The username credential with access to the registry              |
+| `REGISTRY_PASSWORD="password"`                | The password credential with access to the registry              |
 | `IMAGE_NAME="tugboat"`                        | The name of the image being built                                |
 | `IMAGE_VERSION="v1.0.0"`                      | The version for the image being built                            |
 | `IMAGE_SUPPORTED_ARCHITECTURES="amd64,arm64"` | A list of architectures that will be built for this image        |
