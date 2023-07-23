@@ -107,7 +107,7 @@ create_markdown_table() {
       default_value=$(get_default_value_from_help "${line}")
       description=$(get_description_from_help "${line}")
 
-      table="${table}\n| ${name_shorthand} | ${default_value} | ${description} |"
+      table="${table}\n| \`${name_shorthand}\` | ${default_value} | ${description} |"
   done <<< "$1"
   echo "${table}"
 }
