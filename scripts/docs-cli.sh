@@ -92,7 +92,7 @@ get_description_from_help() {
 # Generate a markdown table given a cli flag section as a string
 # i.e.
 #   -c, --config string             Custom path to a configuration file (optional)
-#       --docker-registry string    The docker registry to use (default "docker.io")
+#       --registry string           The docker registry to use (default "docker.io")
 create_markdown_table() {
   local table="|     Option      | Default | Description |"
   table="${table}\n| --------------- | ------- | ----------- |"
@@ -107,7 +107,7 @@ create_markdown_table() {
       default_value=$(get_default_value_from_help "${line}")
       description=$(get_description_from_help "${line}")
 
-      table="${table}\n| ${name_shorthand} | ${default_value} | ${description} |"
+      table="${table}\n| \`${name_shorthand}\` | ${default_value} | ${description} |"
   done <<< "$1"
   echo "${table}"
 }
@@ -238,7 +238,7 @@ generate_documentation() {
 
   log_info "Generating documentation pages for each cli command"
 
-  command_weight=340
+  command_weight=540
   for cmd in $DOCUMENTED_COMMANDS; do
     # split the command by - to detect sub commands
     IFS="-" read -ra cmds <<< "$cmd"
@@ -368,7 +368,7 @@ generate_documentation() {
 
     log_debug "Updating document weight"
     if [[ "${IS_DRY_RUN}" != "true" ]]; then
-      replace_text "weight: 340" "weight: ${command_weight}" "$filename"
+      replace_text "weight: 540" "weight: ${command_weight}" "$filename"
     fi
 
     log_debug "Updating document title"

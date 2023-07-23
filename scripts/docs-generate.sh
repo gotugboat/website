@@ -120,6 +120,22 @@ prepare_help_documentation() {
   fi
 }
 
+prepare_continuous_integration() {
+  log_info "Preparing continuous integration documentation"
+
+  if ! directory_exists "${GENERATED_DOCS_DIR}/continuous-integration"; then
+    log_debug "Creating directory: ${GENERATED_DOCS_DIR}/continuous-integration"
+    if [[ "${IS_DRY_RUN}" != "true" ]]; then
+      mkdir -p "${GENERATED_DOCS_DIR}/continuous-integration"
+    fi
+  fi
+
+  if [[ "${IS_DRY_RUN}" != "true" ]]; then
+    log_debug "Copying continuous integration documentation (${DOC_TEMPLATE_DIR}/continuous-integration -> ${GENERATED_DOCS_DIR})"
+    cp -r "${DOC_TEMPLATE_DIR}/continuous-integration" "${GENERATED_DOCS_DIR}"
+  fi
+}
+
 generate_page_contributing_guidelines() {
   log_info "Generating the contributing guidelines page"
 
@@ -245,6 +261,7 @@ generate_documentation() {
 
   prepare_getting_started_documentation
   prepare_configuration_documentation
+  prepare_continuous_integration
   prepare_help_documentation
 
   generate_page_contributing_guidelines
