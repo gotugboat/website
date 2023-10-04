@@ -15,6 +15,7 @@ toc: true
 
 ## Prerequisites
 - An installation of [Docker Engine](https://docs.docker.com/engine/install/)
+- Access to a container registry (i.e. DockerHub or some other private registry)
 
 ## Install the latest version of Tugboat
 
@@ -28,7 +29,15 @@ curl -sSL https://get.gotugboat.io | bash
 
 ## Build an image
 
-The following example will build and push the image to DockerHub. This step should be done on a machine of each architecture that you wish to support. The following example assumes you are building on an amd64 system.
+Before creating our example image, we should export the credentials required to access the container registry and specify the architectures on which our image will be supported.
+
+```bash
+export REGISTRY_USER="username"
+export REGISTRY_PASSWORD="password"
+export IMAGE_SUPPORTED_ARCHITECTURES="amd64,arm64"
+```
+
+Once our credentials are loaded, the following example demonstrates how to build and push the image to DockerHub. This step should be executed on a machine corresponding to each architecture you intend to support. The example below assumes you are building on an amd64 system.
 
 ```bash
 tugboat build -t gotugboat/my-image:v1.0.0 --push
@@ -43,7 +52,7 @@ With a built image pushed onto the registry, we can give it additional reference
 this example, will push the locally generated tags to your remote registry after they are created.
 
 ```bash
-tugboat tag gotugboat/my-image --tags latest --architectures amd64,arm64 --push
+tugboat tag gotugboat/my-image:v1.0.0 --tags latest --push
 ```
 
 Resulting tags:
@@ -59,7 +68,7 @@ Tugboat creates all images with an architecture prepended to the given tag. This
 <!-- Can we read the registry to see what tags have the arch in it? -->
 
 ```bash
-tugboat manifest create gotugboat/my-image --for v1.0.0,latest --architectures amd64,arm64 --push
+tugboat manifest create gotugboat/my-image --for v1.0.0,latest --push
 ```
 
 Resulting manifests lists:
